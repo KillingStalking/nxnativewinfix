@@ -427,7 +427,7 @@ static void placeLabel(CATextLayer *t, CGPoint c, CGFloat fs) {
 
 - (void)layoutSubviews {
     [super layoutSubviews];
-    UIWindowScene *ws = self.window.windowScene; if (ws) atomic_store(&g_home_right, ws.effectiveGeometry.interfaceOrientation == UIInterfaceOrientationLandscapeRight);
+    orient_update(self);
     CGFloat u = self.u;
     [CATransaction begin]; [CATransaction setDisableActions:YES];
     _controls.frame = self.layer.bounds;
@@ -545,7 +545,7 @@ static BOOL pads_slotted(GCController *gone) {
 UIView *dm_gamepad_view(CGRect frame) { DmGamepad *v = [[DmGamepad alloc] initWithFrame:frame]; g_view = v; return v; }
 void dm_gamepad_reset(void) {   // On resign active: release everything (a key held while switching away and released in background gets no "release")
     dispatch_async(dispatch_get_main_queue(), ^{ [g_view reset]; });
-    pthread_mutex_lock(&g_mu); g_shake_btn = 0; pthread_mutex_unlock(&g_mu); dm_phone_motion_set(NULL); publish();
+    pthread_mutex_lock(&g_mu); g_shake_btn = 0; memset(g_recenter_pad, 0, sizeof g_recenter_pad); g_sticks_since = 0; pthread_mutex_unlock(&g_mu); dm_phone_motion_set(NULL); publish();
     if (g_merge) dm_pad_set(0, 0, 0, 0, 0);
     else for (int p = 0; p < DM_PLAYERS; p++) if (g_held[p]) dm_pad_set_player(p, 0, 0, 0, 0, 0);
 }
