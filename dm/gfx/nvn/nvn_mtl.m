@@ -2072,6 +2072,11 @@ static id<MTLComputePipelineState> bca_pso(void) {
     }
     return ps;
 }
+static int bc_gpu_astc_on(void) {
+    static int on = -1;
+    if (on < 0) { const char *e = getenv("DM_BC_GPU_ASTC"); on = !e || !*e || atoi(e) != 0; }
+    return on;
+}
 static void up_flush(void) {
     up_owner_check("up_flush");
     if (!g_up_cb) return;
@@ -2318,7 +2323,8 @@ static id<MTLTexture> pkg_upload_(const tex_t *t, uint64_t *stamp, id<MTLTexture
         if (astc_candidate) ctotal += (size_t)((w + 3) / 4) * bpb * ((h + 3) / 4) * layers;
     }
     // Keep the extra compressed-input staging bounded. Large levels stay on the existing CPU path.
-    int gast = astc_candidate && g_nvn_deswz_gpu && bca_pso() && ctotal + (astc_kind == 1 ? total : 0) <= (32u << 20);
+    int gast = astc_candidate && bc_gpu_astc_on() && g_nvn_deswz_gpu
+               && ctotal + (astc_kind == 1 ? total : 0) + 255u <= UP_BLOCK_SIZE && bca_pso();
     g_bp_up_bytes += total;
     void *mb; uint64_t mo;
     int use_gpu = !sparse && g_nvn_deswz_gpu && (gast || !bcs) && mtl_addr((uint64_t)t->mem, t->L.size, &mb, &mo);   // BC1-3 may use GPU deswizzle + ASTC transcode; sparse and other BC formats keep the CPU fallback
