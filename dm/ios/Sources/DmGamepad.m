@@ -18,6 +18,7 @@
 #import <CoreMotion/CoreMotion.h>
 #import <CoreText/CoreText.h>
 #include <pthread.h>
+#include <stdlib.h>
 #include "dm.h"
 #include "dm_input.h"
 #include "front.h"
