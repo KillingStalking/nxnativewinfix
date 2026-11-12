@@ -216,7 +216,6 @@ static BOOL fullOnly(int b) { return b == B_LS || b == B_RS || b >= B_LEFT; }   
         pads_start();
         [self padsChanged:nil];
         motion_start();
-        phone_motion_start();
     }
     return self;
 }
